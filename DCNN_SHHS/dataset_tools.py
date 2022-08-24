@@ -46,8 +46,7 @@ def reshape_tensor(signal, slp, freq=4, device='cpu', epoch_length=128):
     signal = signal.unfold(0, epoch_length * freq, 30 * freq)
     return signal.to(device), slp.to(device), start_end
 
-
-class dataset_cnn(Dataset):
+class dataset_h5file(Dataset):
     """Dataset class for reading data from h5 file
     The h5 file should be organized as follows:
     /rri: rri signals of all patients
@@ -57,9 +56,9 @@ class dataset_cnn(Dataset):
     ----------
     h5file: h5py.File object
         h5 file containing the data
-    patient_id: List 
+    patient_id: List
         list of patient id you want to read, by default None, which means all patients
-    signals: dict 
+    signals: dict
         dict of signals you want to read, the values are signals' frequency, by default {'rri': 4}
     epoch_length: int
         length of each epoch, by default 128
