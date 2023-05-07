@@ -46,6 +46,7 @@ def reshape_tensor(signal, slp, freq=4, device='cpu', epoch_length=128):
     signal = signal.unfold(0, epoch_length * freq, 30 * freq)
     return signal.to(device), slp.to(device), start_end
 
+
 class dataset_h5file(Dataset):
     """Dataset class for reading data from h5 file
     The h5 file should be organized as follows:

@@ -1,2 +1,3 @@
-DCNN_SHHS/__pycache__
+__pycache__
 DCNN_SHHS.egg-info/
+.ipynb_checkpoints/

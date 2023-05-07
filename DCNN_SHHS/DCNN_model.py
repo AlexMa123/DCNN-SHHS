@@ -138,9 +138,11 @@ class ResBlock(nn.Module):
 
 
 if __name__ == "__main__":
-    test_rri = torch.rand((1, 1200, 512))
-    test_mad = torch.rand((1, 1200, 128))
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    print(device)
+    test_rri = torch.rand((1, 1200, 512), device=device)
+    test_mad = torch.rand((1, 1200, 128), device=device)
 
-    mynet = DCNN_classifier(num_channels_rri=[2, 4, 8, 16, 32, 64], dilations=[2, 4, 6, 8])
+    mynet = DCNN_classifier(num_channels_rri=[2, 4, 8, 16, 32, 64], dilations=[2, 4, 6, 8]).to(device)
     out = mynet(test_rri, test_mad)
     print(out.shape)
