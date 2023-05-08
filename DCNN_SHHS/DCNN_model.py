@@ -26,7 +26,7 @@ class DCNN_classifier(nn.Module):
         Parameters
         ----------
         epoch_length : tuple, optional
-            length of the input signals in one epoch. 
+            length of the input signals in one epoch.
             For example, 128s RRI (4Hz) and 128s MAD (1Hz) will be (512, 128), by default (512, 128)
         num_windows_features : int, optional
             how many features learned from each window, by default 128
