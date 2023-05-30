@@ -69,7 +69,7 @@ def num_segs(signal, freq, num_windows=1200, windows_size=128, overlap=98, segme
 
 
 def SleepDataset(h5file, features=['rri', 'mad'],
-                 target='stage', pid=None,
+                 target='stage', pid=None, remove_mean={'rri': True, 'mad': False},
                  batchsize=16, shuffle=False, **reshape_kwargs):
     if pid is None:
         pid = list(h5file[target].keys())
@@ -79,11 +79,14 @@ def SleepDataset(h5file, features=['rri', 'mad'],
     for i in range(ceil(len(pid) / batchsize)):
         signals = {}
         for feature in features:
-            remove_mean = True if feature == 'rri' else False
+            try:
+                rm = remove_mean['rri']
+            except KeyError:
+                rm = False
 
             signals[feature] = [
                 reshape_signal(torch.from_numpy(h5file[feature][p][:]),
-                               h5file[feature].attrs['freq'], remove_mean=remove_mean,
+                               h5file[feature].attrs['freq'], remove_mean=rm,
                                **reshape_kwargs) for p in pid[i * batchsize: (i + 1) * batchsize]]
             seg_lengths = [len(s[0]) for s in signals[feature]]
             zero_starts = [s[1] for s in signals[feature]]
@@ -97,12 +100,11 @@ def SleepDataset(h5file, features=['rri', 'mad'],
 
 def predict_stage(net, rri, mad=None, out_prob=False):
     """Predict sleep stage from a neural nework"""
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     net.eval()
     reshaped_rri, zero_start = reshape_signal(rri, 4)
     if mad is not None:
         reshaped_mad, zero_start = reshape_signal(mad, 1)
-        reshaped_mad = reshaped_mad.to(device)
+        reshaped_mad = reshaped_mad
         if reshaped_mad.shape[0] > reshaped_rri.shape[0]:
             shape_diff = reshaped_mad.shape[0] - reshaped_rri.shape[0]
             reshaped_rri = torch.cat([reshaped_rri,
@@ -110,7 +112,7 @@ def predict_stage(net, rri, mad=None, out_prob=False):
                                                   device=reshaped_rri.device, dtype=reshaped_rri.dtype)])
     else:
         reshaped_mad = None
-    reshaped_rri = reshaped_rri.to(device)
+    reshaped_rri = reshaped_rri
     with torch.no_grad():
         predict_score = net(reshaped_rri, reshaped_mad)
     result = []
