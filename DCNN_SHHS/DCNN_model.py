@@ -101,7 +101,7 @@ class DCNN_classifier(nn.Module):
             out_mad = self.signallearning_mad(out_mad)
         else:
             out_mad = torch.zeros((out.shape[0], out.shape[1],
-                                   self.w2 // (2 ** self.num_pooling_mad)))
+                                   self.w2 // (2 ** self.num_pooling_mad)), device=rri.device)
         out = torch.cat([out, out_mad], dim=-1)
 
         out = self.flatten(out)
