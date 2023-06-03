@@ -113,23 +113,33 @@ def predict_stage(net, rri, mad=None, out_prob=False):
     else:
         reshaped_mad = None
     reshaped_rri = reshaped_rri
+
     with torch.no_grad():
-        predict_score = net(reshaped_rri, reshaped_mad)
+        predict_score = net(reshaped_rri, reshaped_mad).reshape(reshaped_rri.shape[0], 
+                                                                reshaped_rri.shape[1], -1)
     result = []
     predict_result = torch.argmax(predict_score, dim=-1)
+
+
     if out_prob:
         predict_prob = softmax(predict_score, dim=-1)
         result_prob = []
     for i in range(predict_result.shape[0]):
         if i == predict_result.shape[0] - 1:
-            result.append(predict_result[i][-240:zero_start])
+            if i != 0:
+                result.append(predict_result[i][-240:zero_start])
+            else:
+                result.append(predict_result[i][:zero_start])
         elif i == 0:
             result.append(predict_result[i])
         else:
             result.append(predict_result[i][-240:])
         if out_prob:
             if i == predict_result.shape[0] - 1:
-                result_prob.append(predict_prob[i][-240:zero_start])
+                if i != 0:
+                    result_prob.append(predict_prob[i][-240:zero_start])
+                else:
+                    result_prob.append(predict_prob[i][:zero_start])
             elif i == 0:
                 result_prob.append(predict_prob[i])
             else:
