@@ -39,7 +39,8 @@ def reshape_signal(signal, freq, num_windows=1200, windows_size=128, overlap=98,
     if signal.shape[0] < num_windows:
         zero_start = signal.shape[0]
         signal = torch.cat([signal, torch.zeros(num_windows - signal.shape[0],
-                                                int(windows_size * freq), device=signal.device)], dim=0)
+                                                int(windows_size * freq), 
+                                                device=signal.device) - 1], dim=0)
         return signal.reshape(1, signal.shape[0], signal.shape[1]), zero_start + 1
     else:
         zero_start = -1
@@ -51,7 +52,8 @@ def reshape_signal(signal, freq, num_windows=1200, windows_size=128, overlap=98,
                 zero_start = signal.shape[0] - i * segment_step
                 signals.append(torch.cat([signal[i * segment_step:],
                                           torch.zeros(num_windows - zero_start,
-                                                      int(windows_size * freq), device=signal.device)],
+                                                      int(windows_size * freq),
+                                                      device=signal.device) - 1],
                                          dim=0))
 
             else:
