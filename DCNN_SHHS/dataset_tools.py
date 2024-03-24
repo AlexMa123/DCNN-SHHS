@@ -72,7 +72,9 @@ def num_segs(signal, freq, num_windows=1200, windows_size=128, overlap=98, segme
 
 def SleepDataset(h5file, features=['rri', 'mad'],
                  target='stage', pid=None, remove_mean={'rri': True, 'mad': False},
-                 batchsize=16, shuffle=False, **reshape_kwargs):
+                 offset={'rri':None, 'mad':None},
+                 batchsize=16, shuffle=False,
+                 **reshape_kwargs):
     if pid is None:
         pid = list(h5file[target].keys())
     if shuffle:
@@ -85,9 +87,11 @@ def SleepDataset(h5file, features=['rri', 'mad'],
                 rm = remove_mean['rri']
             except KeyError:
                 rm = False
-
+            offset_signal = 0
+            if offset[feature] is not None:
+                offset_signal = np.random.uniform(*offset[feature])
             signals[feature] = [
-                reshape_signal(torch.from_numpy(h5file[feature][p][:]),
+                reshape_signal(torch.from_numpy(h5file[feature][p][:] + offset_signal),
                                h5file[feature].attrs['freq'], remove_mean=rm,
                                **reshape_kwargs) for p in pid[i * batchsize: (i + 1) * batchsize]]
             seg_lengths = [len(s[0]) for s in signals[feature]]
